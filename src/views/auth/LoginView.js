@@ -15,6 +15,7 @@ import {
 import FacebookIcon from 'src/icons/Facebook';
 import GoogleIcon from 'src/icons/Google';
 import Page from 'src/components/Page';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,15 +44,25 @@ const LoginView = () => {
         <Container maxWidth="sm">
           <Formik
             initialValues={{
-              email: 'demo@devias.io',
-              password: 'Password123'
+              email: '',
+              password: ''
             }}
             validationSchema={Yup.object().shape({
               email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
               password: Yup.string().max(255).required('Password is required')
             })}
-            onSubmit={() => {
-              navigate('/app/dashboard', { replace: true });
+            onSubmit={(values, { setSubmitting, setErrors }) => {
+              const { email, password } = values;
+
+              axios.post('authentication/login', {
+                email,
+                password,
+              }).then(() => {
+                navigate('/');
+              }, (errors) => {
+                setSubmitting(false);
+                setErrors(errors);
+              });
             }}
           >
             {({

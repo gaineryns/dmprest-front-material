@@ -1,12 +1,13 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core';
+import axios from 'axios';
+import NavBar from './NavBar/index';
 import TopBar from './TopBar';
-import BottomBar from './BottomBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.background.dark,
     display: 'flex',
     height: '100%',
     overflow: 'hidden',
@@ -16,7 +17,10 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flex: '1 1 auto',
     overflow: 'hidden',
-    paddingTop: 64
+    paddingTop: 64,
+    [theme.breakpoints.up('lg')]: {
+      paddingLeft: 256
+    }
   },
   contentContainer: {
     display: 'flex',
@@ -30,17 +34,31 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const MainLayout = () => {
+const UserPrestLayout = () => {
   const classes = useStyles();
-
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    (
+      async () => {
+        try {
+          const response = await axios.get('authentication');
+          const userUpdated = response.data;
+          setUser(userUpdated);
+        } catch (e) {
+          navigate('/login');
+        }
+      }
+    )();
+  }, []);
   return (
     <div className={classes.root}>
       <TopBar />
+      <NavBar user={user} />
       <div className={classes.wrapper}>
         <div className={classes.contentContainer}>
           <div className={classes.content}>
             <Outlet />
-            <BottomBar />
           </div>
         </div>
       </div>
@@ -48,4 +66,4 @@ const MainLayout = () => {
   );
 };
 
-export default MainLayout;
+export default UserPrestLayout;
